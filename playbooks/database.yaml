@@ -1,8 +1,75 @@
+---
 - name: Play database
   hosts: db 
   gather_facts: no
+  become: yes
+  tags:
+  - db-install
   tasks:
   - name: hello DB
     debug:
         msg: "hello DB"
+#sudo apt-get install gnupg
+  - name: Install gnupg
+    package: 
+      name: gnupg
+      state: present 
+#wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
+  - name: Mongo DB key is added
+    apt_key:
+        url: https://www.mongodb.org/static/pgp/server-4.2.asc
+#echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.2 main" | sudo tee /etc/apt/sources.list.d/mongodb.list
+  - name: mongo DB is enabled
+    apt_repository:
+       repo: deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.2 main
+       state: present
+       filename: mongodb
+#sudo apt install mongodb-org
+  - name: Installing MongoDB  
+    package: 
+     name: mongodb-org
+     state: present
+#sudo systemctl start mongod 
+#sudo systemctl enable mongod
+  - name: mongodb is started
+    service:
+     name: mongod
+     state: started
+     enabled: yes
+##whitelist IPs : https://www.digitalocean.com/community/tutorials/how-to-install-mongodb-on-ubuntu-18-04
+#Validate: mongo --eval 'db.runCommand({ connectionStatus: 1})'
+
+- name: Configure database- Admin 
+  hosts: db 
+  gather_facts: no
+  become: yes
+  tags:
+  - db-config-admin
+  tasks:
+  - name: Create admin user
+    command:  "{{ item }}"
+    loop:
+    - mongo admin --eval 'db.dropUser("superadmin")'
+    - |
+      mongo admin --eval 'db.createUser( { user: "superadmin", pwd: "MyPass1234", roles: [ { role: "clusterAdmin", db: "admin" }, { role: "userAdminAnyDatabase", db: "admin" } ] } )'
+
+
+
+#2) drop admin user if exist
+#mongo admin --eval 'db.dropUser("superadmin")'
+#3) create admin user
+#mongo admin --eval 'db.createUser( { user: "superadmin", pwd: "MyPass1234", roles: [ { role: "clusterAdmin", db: "admin" }, { role: "userAdminAnyDatabase", db: "admin" } ] } )'
+#4) enable security (/etc/mongod.conf) --> Restart Mongodb
+#> security:
+#>   authorization: "enabled"
+
+
+
+
+
+
+
+       
+
+
 
