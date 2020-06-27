@@ -1,0 +1,11 @@
+app   ansible_host=3.91.106.17
+db    ansible_host=3.230.169.37
+
+[todo]
+app
+db
+
+[todo:vars]
+ansible_ssh_user=ansadmin
+#ansible_ssh_pass=somepassword 
+ansible_private_key_file=/home/ansadmin/.ssh/id_rsa

@@ -1,0 +1,8 @@
+- name: Play database
+  hosts: db 
+  gather_facts: no
+  tasks:
+  - name: hello DB
+    debug:
+        msg: "hello DB"
+

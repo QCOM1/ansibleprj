@@ -1,0 +1,8 @@
+- name: Play frontend
+  hosts: app 
+  gather_facts: no
+  tasks:
+    - name: hello frontend
+      debug:
+          msg: "hello frontend"
+  
