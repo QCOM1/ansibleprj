@@ -102,8 +102,20 @@
       roles:
         - db: "{{db_name_todo}}"
           role: readWrite 
-
-
+        
+  - name: db accepts connection from anywhere
+    lineinfile:
+        path: /etc/mongod.conf
+        line: "  bindIp: 0.0.0.0"
+        regexp: '^(.*)bindIp(.*)$'
+        state: present
+        backup: yes
+    notify: mongodb is restarted
+  handlers:
+  - name: mongodb is restarted
+    service:
+      name: mongod
+      state: restarted
 
 
        
