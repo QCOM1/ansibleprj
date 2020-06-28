@@ -22,10 +22,24 @@
 
 - name: Play backend
   hosts: app 
+  become: yes
   gather_facts: no
   tags:
   - be-build
   tasks:
+  - name: Workspace build exists
+    file: 
+      path: /opt/build_dir
+      state: directory
+  - name: git checkout 
+    git:
+      repo: https://github.com/kubernetes-tn/go-to-do-app.git
+      dest: /opt/build_dir/go-to-do-app
+  - name: Build code
+    shell: source /etc/profile;go build -o /tmp/todo
+    args:
+      chdir:  /opt/build_dir/go-to-do-app/server
+
 
   
   
