@@ -46,14 +46,26 @@
   tags:
   - db-config-admin
   tasks:
-  - name: Create admin user
-    command:  "{{ item }}"
-    loop:
-    - mongo admin --eval 'db.dropUser("superadmin")'
-    - |
-      mongo admin --eval 'db.createUser( { user: "superadmin", pwd: "MyPass1234", roles: [ { role: "clusterAdmin", db: "admin" }, { role: "userAdminAnyDatabase", db: "admin" } ] } )'
-
-
+  #- name: Create admin user
+  #  command:  "{{ item }}"
+  #  loop:
+  #  - mongo admin --eval 'db.dropUser("{{db_admin_user}}}")'
+  #  - |
+  #    mongo admin --eval 'db.createUser( { user: "{{db_admin_user}}", pwd: "{{db_admin_pass}}", roles: [ { role: "clusterAdmin", db: "admin" }, { role: "userAdminAnyDatabase", db: "admin" } ] } )'
+  - name: Enable security
+    blockinfile:
+      path: /etc/mongod.conf
+      block: |
+       security:
+        authorization: "enabled"
+      backup: yes
+      state: present
+    notify: mongodb is Restarted 
+  handlers:
+  - name: mongodb is Restarted
+    service:
+      name: mongod
+      state: restarted 
 
 #2) drop admin user if exist
 #mongo admin --eval 'db.dropUser("superadmin")'
@@ -64,7 +76,32 @@
 #>   authorization: "enabled"
 
 
-
+- name: Rest of  database- Configure 
+  hosts: db 
+  gather_facts: no
+  become: yes
+  tags:
+  - db-config
+  tasks:
+  - name: pip3 install
+    package: 
+      name: python3-pip
+      state: present
+  - name: pip pymongo install
+    pip:
+      name: pymongo
+      state: latest
+  - name: todo DB user exists
+    mongodb_user:
+      login_user: "{{db_admin_user}}" 
+      login_password: "{{db_admin_pass}}"
+      database: admin
+      user: "{{db_user_todo}}"
+      password: "{{db_pass_todo}}"
+      state: present
+      roles:
+        - db: "{{db_name_todo}}"
+          role: readWrite 
 
 
 
